@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 import sys
 import math
 
@@ -59,6 +60,8 @@ cfunding=c[fundingStart:fundingStart+fundingLen]
 #set up other variables
 issues_list=[cwages,chiring,cworkload,cleaves,cworkcond,ctraining,cequity,cinteraction,chealth,cfinance,cfunding]
 titles_list = [issue[0][:issue[0].find(" [")] for issue in issues_list]
+#this is a hack, but the slash in one entry is a problem
+titles_list[-2].replace('/','-')
 numResponses = len(df.index)
 
 #clean up df and set up binaries for affects and imporant
@@ -177,3 +180,39 @@ if script_option==2:
         f.subplots_adjust(hspace=.5)
         #outputs the figures 
         f.savefig('Gender_'+titles_list[ii].replace("/",".")+'_hist.png')
+
+
+def supercount_equity(df,Icol,col):
+    Ei=df.loc[(df[Icol]=='yes') & ((df[col]=='important')| (df[col]=='both'))].count()[0]
+    Ea=df.loc[(df[Icol]=='yes') & ((df[col]=='affects')| (df[col]=='both'))].count()[0]
+    Ni=df.loc[(df[Icol]!='yes') & ((df[col]=='important')| (df[col]=='both'))].count()[0]
+    Na=df.loc[(df[Icol]!='yes') & ((df[col]=='affects')| (df[col]=='both'))].count()[0]
+    Es=df.loc[(df[Icol]=='yes')].count()[0]
+    Ns=df.loc[(df[Icol]!='yes')].count()[0]
+    return[float(Ei)/Es,float(Ea)/Es,float(Ni)/Ns,float(Na)/Ns]
+
+def make_comp_plot_equity(df,Icol,cols,outname):
+    counts=np.zeros([len(cols),4])
+    for ii in range(0,len(cols)):
+        counts[ii]=supercount_equity(df,Icol,cols[ii])
+    counts*=100
+    fig,ax=plt.subplots()
+    fig.set_size_inches(24.5, 10.5)    
+    ax.plot(counts[:,2],counts[:,3],'ro')
+    for i, txt in enumerate(cols):
+        ax.annotate(i, (counts[i,0],counts[i,1]))
+        ax.plot(counts[i,0],counts[i,1],'bo',label=str(i)+'--- E : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,2],counts[i,3]))
+        ax.plot(counts[i,2],counts [i,3],'ro',label=str(i)+'--- N : '+cols[i][cols[i].find("[")+1:-1])
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.ylabel('Affects (%)')
+    plt.xlabel('Important (%)')
+    plt.tight_layout()
+    fig.savefig(outname)
+
+if script_option==4:
+    eq_cols=['eq_race','eq_trans','eq_gender','eq_disability','eq_sexuality']
+    for eq in eq_cols:
+        for issues in issues_list:
+            make_comp_plot_equity(df,eq,issues,'comp_plot_'+eq+'_'+issues[0][:issues[0].find("[")-1].replace('/','-')+'.png')
+            
