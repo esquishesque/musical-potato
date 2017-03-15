@@ -207,7 +207,7 @@ def make_comp_plot_equity(df,Icol,cols,outname):
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.ylabel('Affects (%)')
     plt.xlabel('Important (%)')
-    plt.tight_layout()
+#    plt.tight_layout()
     fig.savefig(outname)
 
 if script_option==4:
@@ -216,3 +216,107 @@ if script_option==4:
         for issues in issues_list:
             make_comp_plot_equity(df,eq,issues,'comp_plot_'+eq+'_'+issues[0][:issues[0].find("[")-1].replace('/','-')+'.png')
             
+def supercount_work(df,Icol,col):
+    TAs=float(df.loc[(df[Icol].str.contains('TA')==True)].count()[0])
+    TAi=df.loc[(df[Icol].str.contains('TA')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/TAs
+    TAa=df.loc[(df[Icol].str.contains('TA')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/TAs
+
+    CIs=float(df.loc[(df[Icol].str.contains('CI')==True)].count()[0])
+    CIi=df.loc[(df[Icol].str.contains('CI')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/CIs
+    CIa=df.loc[(df[Icol].str.contains('CI')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/CIs
+
+    CPOs=float(df.loc[(df[Icol].str.contains('CPO')==True)].count()[0])
+    CPOi=df.loc[(df[Icol].str.contains('CPO')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/CPOs
+    CPOa=df.loc[(df[Icol].str.contains('CPO')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/CPOs
+
+    AIs=float(df.loc[(df[Icol].str.contains('AI')==True)].count()[0])
+    if AIs!=0:
+        AIi=df.loc[(df[Icol].str.contains('AI')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/AIs
+        AIa=df.loc[(df[Icol].str.contains('AI')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/AIs
+    else:
+        AIi=0
+        AIa=0
+        
+    return[TAi,TAa,CIi,CIa,CPOi,CPOa,AIi,AIa]
+
+def make_comp_plot_work(df,cols,outname):
+    counts=np.zeros([len(cols),8])
+    for ii in range(0,len(cols)):
+        counts[ii]=supercount_work(df,'What kind(s) of Unit 1 work have you done? ',cols[ii])
+    counts*=100
+    fig,ax=plt.subplots()
+    fig.set_size_inches(24.5, 10.5)    
+    ax.plot(counts[:,2],counts[:,3],'ro')
+    for i, txt in enumerate(cols):
+        ax.annotate(i, (counts[i,0],counts[i,1]))
+        ax.plot(counts[i,0],counts[i,1],'bo',label=str(i)+'--- TA : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,2],counts[i,3]))
+        ax.plot(counts[i,2],counts [i,3],'ro',label=str(i)+'--- CI : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,4],counts[i,5]))
+        ax.plot(counts[i,4],counts[i,5],'go',label=str(i)+'--- CPO : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,6],counts[i,7]))
+        ax.plot(counts[i,6],counts [i,7],'mo',label=str(i)+'--- AI : '+cols[i][cols[i].find("[")+1:-1])
+
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.ylabel('Affects (%)')
+    plt.xlabel('Important (%)')
+#    plt.tight_layout()
+    fig.savefig(outname)
+
+if script_option==5:
+    for issues in issues_list:
+        make_comp_plot_work(df,issues,'comp_plot_work_type_'+issues[0][:issues[0].find("[")-1].replace('/','-')+'.png')
+
+def supercount_div(df,Icol,col):
+    D1s=float(df.loc[(df[Icol].str.contains('Humanities')==True)].count()[0])
+    D1i=df.loc[(df[Icol].str.contains('Humanities')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/D1s
+    D1a=df.loc[(df[Icol].str.contains('Humanities')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/D1s
+
+    D2s=float(df.loc[(df[Icol].str.contains('Social')==True)].count()[0])
+    D2i=df.loc[(df[Icol].str.contains('Social')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/D2s
+    D2a=df.loc[(df[Icol].str.contains('Social')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/D2s
+
+    D3s=float(df.loc[(df[Icol].str.contains('Physical')==True)].count()[0])
+    D3i=df.loc[(df[Icol].str.contains('Physical')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/D3s
+    D3a=df.loc[(df[Icol].str.contains('Physical')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/D3s
+
+    D4s=float(df.loc[(df[Icol].str.contains('Life')==True)].count()[0])
+    D4i=df.loc[(df[Icol].str.contains('Life')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/D4s
+    D4a=df.loc[(df[Icol].str.contains('Life')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/D4s
+
+    D5s=float(df.loc[(df[Icol].str.contains('OISE')==True)].count()[0])
+    D5i=df.loc[(df[Icol].str.contains('OISE')==True) & ((df[col]=='important')| (df[col]=='both')) ].count()[0]/D5s
+    D5a=df.loc[(df[Icol].str.contains('OISE')==True)  & ((df[col]=='affects')| (df[col]=='both'))].count()[0]/D5s
+        
+    return[D1s,D1a,D2s,D2a,D3s,D3a,D4a,D4a,D5a,D5s]
+
+def make_comp_plot_div(df,cols,outname):
+    counts=np.zeros([len(cols),8])
+    for ii in range(0,len(cols)):
+        counts[ii]=supercount_work(df,'What department(s) are you a student in?',cols[ii])
+    counts*=100
+    fig,ax=plt.subplots()
+    fig.set_size_inches(24.5, 10.5)    
+    ax.plot(counts[:,2],counts[:,3],'ro')
+    for i, txt in enumerate(cols):
+        ax.annotate(i, (counts[i,0],counts[i,1]))
+        ax.plot(counts[i,0],counts[i,1],'bo',label=str(i)+'--- D1 : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,2],counts[i,3]))
+        ax.plot(counts[i,2],counts [i,3],'ro',label=str(i)+'--- D2 : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,4],counts[i,5]))
+        ax.plot(counts[i,4],counts[i,5],'go',label=str(i)+'--- D3 : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,6],counts[i,7]))
+        ax.plot(counts[i,6],counts [i,7],'mo',label=str(i)+'--- D4 : '+cols[i][cols[i].find("[")+1:-1])
+        ax.annotate(i, (counts[i,8],counts[i,9]))
+        ax.plot(counts[i,8],counts [i,9],'mo',label=str(i)+'--- D5 : '+cols[i][cols[i].find("[")+1:-1])
+
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.ylabel('Affects (%)')
+    plt.xlabel('Important (%)')
+#    plt.tight_layout()
+    fig.savefig(outname)
+
+if script_option==6:
+    for issues in issues_list:
+        make_comp_plot_work(df,issues,'comp_plot_student_div_'+issues[0][:issues[0].find("[")-1].replace('/','-')+'.png')
+
